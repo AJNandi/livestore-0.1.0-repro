@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "baseUrl": "src",
+    "target": "es6",
+    "lib": ["es6", "es2021", "dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "downlevelIteration": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "noImplicitReturns": true,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "sourceMap": true,
+    "jsx": "react-jsx",
+    "declarationDir": "lib",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "rootDir": "src",
+    "exactOptionalPropertyTypes": false
+  },
+  "include": ["src"]
+}

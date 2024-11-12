@@ -1,0 +1,44 @@
+name: Lezer Codemirror Plugin
+
+on:
+  pull_request:
+    branches: [development, main]
+    paths:
+      - "packages/lezer-spreadsheet/**"
+
+jobs:
+  lezer:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        id: setup
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+          cache-dependency-path: "**/package-lock.json"
+
+      - name: Cache node modules
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            **/node_modules
+          key: ${{ github.workflow }}-sheetgraph-node-${{ matrix.node-version }}-npm-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.patch') }}
+
+      - name: Install dependencies
+        id: install
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci -w @repo/lezer-spreadsheet
+
+      - name: Vitest Lezer
+        id: lezerTest
+        if: (steps.cache.outcome == 'success' || steps.install.outcome == 'success') && always()
+        run: npm test -w @repo/lezer-spreadsheet

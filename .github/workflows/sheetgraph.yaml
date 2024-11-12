@@ -1,0 +1,60 @@
+name: SheetGraph
+
+on:
+  pull_request:
+    branches:
+      - main
+      - development
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        override: true
+
+    - name: Install wasm32 target
+      run: rustup target add wasm32-unknown-unknown
+  
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+
+    - name: Install wasm-pack
+      run: |
+        npm install -g wasm-pack
+        cargo install wasm-bindgen-cli
+
+    - name: Run test script
+      run: npm run rustest
+
+    - name: Wasm build
+      run: npm run wasm
+    
+    - name: Install dependencies
+      id: install
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: npm ci
+      env:
+          GH_AUTH_TOKEN: ${{ secrets.GH_AUTH_TOKEN }}
+
+    - name: Lint
+      id: linting
+      if: (steps.cache.outcome == 'success' || steps.install.outcome == 'success') && always()
+      run: npm run tsc -w tauri-app
+
+    - name: SG test
+      id: sg-test
+      if: (steps.cache.outcome == 'success' || steps.install.outcome == 'success') && always()
+      run: npm run test
+      env:
+        VITE_SUBSET_API_URL: DUMMY_API_URL
+        VITE_INSTANT_APP_ID: DUMMY_APP_ID
